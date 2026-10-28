@@ -23,6 +23,7 @@
 | 移动端 | 390px 单栏正常，命盘、判词、x402 区块无溢出 |
 | HTML 结构 | 无重复 id，无失效锚点，`target=_blank` 均带 `rel=noopener` |
 | YAML | `render.yaml`、`open-day.yml` 语法有效 |
+| GitHub Actions | 手动触发 `open-day`，运行成功；当日已开，keeper 幂等退出 |
 
 ## 本轮修复
 
@@ -33,6 +34,7 @@
 5. **`npm start` 依赖 `.env`**：拆成 `start`（读环境变量）、`start:env`（本地 .env）、`dev`（mock）。
 6. **CI 权限过大**：workflow 加 `permissions: contents: read`。
 7. **keeper 不校验网络**：新增 chain id 196 检查；无 `PRIVATE_KEY` 时安全跳过而不是报错。
+8. **Pages 资源缓存**：给 CSS/JS 加版本号，避免部署后 10 分钟内拿到旧脚本。
 
 ## 仍存在的风险
 
@@ -45,6 +47,7 @@
 | 中 | 合约 owner 是单一 EOA，无转移/多签 | 生产前换成多签或加 `transferOwnership` + 延时 |
 | 低 | 限流是单实例内存态 | 多实例部署时换 Redis/网关限流 |
 | 低 | Express 无 CSP | 静态站由 GitHub/Cloudflare 托管，风险有限；自建可补 |
+| 低 | Pages 资源 `max-age=600` | 已加版本号；以后改前端记得同步 bump |
 | 低 | 仓库无 LICENSE | 想让人复用就加 MIT，否则默认保留所有权利 |
 
 ## 复现命令
