@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>链签 · CHAIN OMEN — 你的钱包今天想说什么</title>
+<meta name="description" content="每日一签，由 X Layer 区块哈希与你的地址共同派生。同一天、同一地址，永远是同一卦。">
+<meta name="theme-color" content="#07070a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2307070a'/%3E%3Crect x='9' y='9' width='46' height='46' fill='none' stroke='%23c9a86a' stroke-width='1.5'/%3E%3Ctext x='32' y='45' font-size='30' text-anchor='middle' fill='%23c9a86a' font-family='serif'%3E签%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="brand" href="./">
+    <span class="brand-mark">签</span>
+    <span class="brand-text">链签<em>CHAIN OMEN</em></span>
+  </a>
+  <nav>
+    <a href="#how">怎么算的</a>
+    <a href="#contract">存证合约</a>
+    <span class="net"><i></i>X LAYER</span>
+  </nav>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="hero-inner">
+      <p class="eyebrow"><span class="line"></span>每日一签 · 由区块哈希派生</p>
+      <h1>你的钱包，<br><em>今天想说什么？</em></h1>
+      <p class="lede">不是随机数，是命。输入地址，取一枚只属于今天的签——同一天、同一地址，永远是同一卦；过了子时，卦象重排。</p>
+      <form id="cast" autocomplete="off" novalidate>
+        <label class="field">
+          <input id="addr" name="addr" placeholder="0x…  粘贴钱包地址，或留空" spellcheck="false" autocomplete="off" autocapitalize="off">
+        </label>
+        <button type="submit" class="primary">起 卦</button>
+      </form>
+      <div class="chips">
+        <button type="button" class="chip" id="random">随机一个钱包</button>
+        <span class="free">免费 · 不连接钱包 · 不读私钥</span>
+      </div>
+    </div>
+    <div class="scroll-hint" aria-hidden="true"><span></span>向下</div>
+  </section>
+
+  <section class="stage" id="stage" hidden>
+    <div class="stage-head">
+      <p class="eyebrow"><span class="line"></span>本日卦象 · <span id="stageDate"></span></p>
+      <p class="stage-note" id="stageNote">同一地址，今日重算结果不变。</p>
+    </div>
+
+    <div class="stage-grid">
+      <div class="chart-col">
+        <div class="chart-frame">
+          <canvas id="chart" aria-label="八维命盘"></canvas>
+          <div class="chart-corner tl"></div>
+          <div class="chart-corner tr"></div>
+          <div class="chart-corner bl"></div>
+          <div class="chart-corner br"></div>
+        </div>
+        <ul class="dims" id="dims"></ul>
+        <p class="chart-caption" id="caption">☰ 乾 · 天行健</p>
+        <div class="chart-guide">
+          <p><b>读盘</b><span>外圈为盛，内圈为弱。八维取值 0–100。</span></p>
+          <p><b>本卦</b><span>取最盛的一维，象辞见右。</span></p>
+        </div>
+      </div>
+
+      <article class="reading" id="reading">
+        <div class="reading-head">
+          <span class="grade" id="grade">上上签</span>
+          <span class="no" id="no">第 88 签</span>
+          <span class="hash-short" id="hashShort"></span>
+        </div>
+
+        <h2 id="name">守夜人</h2>
+        <p class="en" id="en">THE NIGHT WATCHER</p>
+        <p class="desc" id="desc"></p>
+
+        <div class="poem" id="poem"></div>
+
+        <div class="gua">
+          <span class="gua-glyph" id="guaGlyph">☰</span>
+          <span class="gua-text"><b id="guaName">乾</b><i id="guaXiang">天行健，君子以自强不息。</i></span>
+        </div>
+
+        <div class="yi-ji">
+          <div class="row"><span class="tag yi">宜</span><b id="yi">加仓</b></div>
+          <div class="row"><span class="tag ji">忌</span><b id="ji">追高</b></div>
+        </div>
+
+        <ul class="luck" id="luck"></ul>
+
+        <div class="unlock" id="unlock">
+          <div class="unlock-head">
+            <span>完整解签</span>
+            <span class="price">x402 · 0.10 USDT</span>
+          </div>
+          <p class="teaser" id="teaser"></p>
+          <button class="pay" id="pay"><span>解锁 · 0.10 USDT</span><i>PAY PER READ</i></button>
+          <p class="fine" id="payNote">0.10 USDT · 由 OKX Wallet 签名，gas 由 facilitator 代付。</p>
+        </div>
+        <div class="unlocked" id="unlocked" hidden></div>
+
+        <div class="actions">
+          <button class="ghost" id="download" disabled>下载签文</button>
+          <button class="ghost" id="sealBtn">上链存证</button>
+          <button class="ghost" id="again">换个地址</button>
+        </div>
+
+        <p class="hashline">FORTUNE <code id="hash">0x</code></p>
+      </article>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="how-head">
+      <p class="eyebrow"><span class="line"></span>MECHANISM</p>
+      <h3>玄学的外壳，<br>确定性的内核。</h3>
+    </div>
+    <div class="how-body">
+      <p class="formula"><span>fortune</span> = keccak256( <b>daySeed</b> ‖ <b>address</b> ‖ <b>day</b> )</p>
+      <ol class="steps">
+        <li><span>01</span><div><b>日种子</b><p>每天第一笔交易把前一个区块的哈希写进合约。它公开、唯一、无法回滚。</p></div></li>
+        <li><span>02</span><div><b>命盘派生</b><p>把地址、日种子、日期索引一起哈希，得到八维分值与签文。任何人可复算。</p></div></li>
+        <li><span>03</span><div><b>可选存证</b><p>花 0.0001 OKB 把当天的签写进合约。日后无论谁改前端，链上那枚签不会变。</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="contract" id="contract">
+    <div>
+      <p class="eyebrow"><span class="line"></span>ONCHAIN SEAL</p>
+      <h3>签可以只是玩笑，<br>也可以是一份凭证。</h3>
+    </div>
+    <div class="contract-card">
+      <div class="kv"><span>网络</span><b>X Layer Mainnet · 196</b></div>
+      <div class="kv"><span>合约</span><b class="mono"><a id="contractAddr" href="deploy.html">待部署</a></b></div>
+      <div class="kv"><span>方法</span><b class="mono">seal() · 0.0001 OKB</b></div>
+      <div class="kv"><span>读法</span><b class="mono">fortuneOf(address, day)</b></div>
+      <p class="contract-note">合约只存一枚 32 字节的哈希，不存地址画像、不存任何隐私数据。它证明的是「这枚签在今天之前就存在」，而不是「这枚签很准」。</p>
+      <p class="contract-note"><a class="deploy-link" href="deploy.html">还没有部署？用 OKX Wallet 两步上主网 →</a></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>链签 · CHAIN OMEN</span>
+  <span>娱乐产品，不构成投资建议。</span>
+  <span>Built on X Layer</span>
+</footer>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="close" id="closeModal" aria-label="关闭">×</button>
+    <p class="eyebrow"><span class="line"></span>SEAL ONCHAIN</p>
+    <h3 id="modalTitle">把今天这枚签，钉在链上。</h3>
+    <p class="modal-lede">存证不改变运势，只改变「谁说了算」。写入后，这枚签的时间与内容都可被任何人验证。</p>
+    <div class="kv"><span>地址</span><b class="mono" id="mAddr"></b></div>
+    <div class="kv"><span>日期索引</span><b class="mono" id="mDay"></b></div>
+    <div class="kv stack"><span>日种子</span><b class="mono" id="mSeed"></b></div>
+    <div class="kv stack"><span>签文哈希</span><b class="mono" id="mHash"></b></div>
+    <div class="kv"><span>费用</span><b class="mono">0.0001 OKB</b></div>
+    <pre id="mCmd"></pre>
+    <button class="seal-now" id="sealNow" hidden>用钱包存证 · 0.0001 OKB</button>
+    <p class="fine" id="sealResult"></p>
+    <div class="modal-actions">
+      <button class="ghost" id="copyCmd">复制命令</button>
+      <button class="ghost" id="closeModal2">知道啦</button>
+    </div>
+    <p class="fine" id="mNote">演示环境未部署合约，日种子由日期派生；链上版本取当日首个区块的父哈希。部署后此处会直接唤起 OKX Wallet 签名。</p>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

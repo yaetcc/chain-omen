@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: chain-omen
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.mjs
+    healthCheckPath: /api/config
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # demo mode: mock facilitator, no real settlement.
+      # for real x402, remove this and add OKX_API_KEY / OKX_SECRET_KEY / OKX_PASSPHRASE
+      - key: X402_MOCK
+        value: "1"

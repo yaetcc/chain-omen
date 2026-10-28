@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>部署 · 链签 FortuneSeal</title>
+<meta name="theme-color" content="#07070a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2307070a'/%3E%3Crect x='9' y='9' width='46' height='46' fill='none' stroke='%23c9a86a' stroke-width='1.5'/%3E%3Ctext x='32' y='45' font-size='30' text-anchor='middle' fill='%23c9a86a' font-family='serif'%3E签%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .deploy {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 140px var(--pad) 100px;
+  }
+  .deploy h1 { font-size: clamp(38px, 6vw, 76px); margin-bottom: 22px; }
+  .deploy .lede { max-width: 560px; }
+  .deploy-card {
+    margin-top: 46px;
+    border: 1px solid var(--hair);
+    background: linear-gradient(180deg, rgba(201,168,106,.045), rgba(201,168,106,.008));
+    padding: clamp(22px, 4vw, 34px);
+  }
+  .wallet-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr .8fr;
+    gap: 18px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--hair-soft);
+  }
+  .wallet-row span { display: block; font-size: 9px; letter-spacing: .2em; color: var(--ink-faint); margin-bottom: 6px; }
+  .wallet-row b { font-family: var(--mono); font-size: 11px; font-weight: 400; color: var(--ink); word-break: break-all; }
+  .deploy-steps { list-style: none; margin: 6px 0 26px; padding: 0; }
+  .deploy-steps li {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--hair-soft);
+  }
+  .deploy-steps li > span { font-family: var(--mono); font-size: 10px; color: var(--gold); }
+  .deploy-steps b { display: block; font-size: 13px; letter-spacing: .1em; font-weight: 500; }
+  .deploy-steps p { margin: 4px 0 0; font-size: 11px; color: var(--ink-faint); }
+  .deploy-steps em {
+    margin-left: auto;
+    font-style: normal;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .16em;
+    color: var(--ink-faint);
+    border: 1px solid var(--hair-soft);
+    padding: 4px 8px;
+    white-space: nowrap;
+  }
+  .deploy-steps li.active em { color: var(--gold); border-color: var(--gold-deep); }
+  .deploy-steps li.done em { color: #7ad19a; border-color: rgba(122,209,154,.45); }
+  .wide { width: 100%; padding: 16px; font-size: 12px; }
+  .deploy-hint { margin-top: 14px; min-height: 18px; }
+  .deploy-hint.err { color: #c96a5f; }
+  .done-card {
+    margin-top: 26px;
+    border: 1px solid rgba(122,209,154,.35);
+    padding: 24px;
+    background: rgba(122,209,154,.035);
+  }
+  .done-card h3 { font-size: 24px; margin-bottom: 8px; }
+  .done-addr {
+    display: block;
+    margin: 14px 0;
+    padding: 12px 14px;
+    background: #06060a;
+    border: 1px solid var(--hair-soft);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gold-hi);
+    word-break: break-all;
+  }
+  .done-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  @media (max-width: 640px) {
+    .wallet-row { grid-template-columns: 1fr 1fr; }
+    .wallet-row > div:last-child { grid-column: span 2; }
+  }
+</style>
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="brand" href="./">
+    <span class="brand-mark">签</span>
+    <span class="brand-text">链签<em>CHAIN OMEN</em></span>
+  </a>
+  <nav>
+    <a href="./">返回签文</a>
+    <span class="net"><i></i>X LAYER · 196</span>
+  </nav>
+</header>
+
+<main class="deploy">
+  <p class="eyebrow"><span class="line"></span>DEPLOY · FORTUNESEAL</p>
+  <h1>把签池，<br><em>钉在主网上。</em></h1>
+  <p class="lede">两步：部署 <code>FortuneSeal</code> 合约，然后开启今天的日种子。全程由 OKX Wallet 签名，私钥不离开你的设备。</p>
+
+  <div class="deploy-card">
+    <div class="wallet-row">
+      <div><span>钱包</span><b id="acct">未连接</b></div>
+      <div><span>余额</span><b id="bal">—</b></div>
+      <div><span>网络</span><b id="net">—</b></div>
+    </div>
+
+    <ol class="deploy-steps">
+      <li id="s1"><span>01</span><div><b>连接钱包</b><p>OKX Wallet / 任意 EVM 钱包</p></div><em id="e1">待办</em></li>
+      <li id="s2"><span>02</span><div><b>部署合约</b><p>solc 0.8.26 · optimizer 200 · 约 0.00002 OKB gas</p></div><em id="e2">待办</em></li>
+      <li id="s3"><span>03</span><div><b>开启今日签池</b><p>openDay() · 写入父区块哈希作为日种子</p></div><em id="e3">待办</em></li>
+    </ol>
+
+    <button id="action" class="primary wide">连接 OKX Wallet</button>
+    <p class="fine deploy-hint" id="hint">没有钱包？在手机 OKX Wallet 的 DApp 浏览器里打开此页。</p>
+  </div>
+
+  <div class="done-card" id="done" hidden>
+    <h3>已上链。</h3>
+    <p class="fine">合约地址：</p>
+    <code class="done-addr" id="addr">—</code>
+    <p class="fine">已写入本机 localStorage，刷新签文页即会显示这个地址。正式发布时把地址写进 <code>app.js</code> 的 <code>CONTRACT</code> 常量。</p>
+    <div class="done-actions">
+      <a class="ghost" id="explorer" href="#" target="_blank" rel="noopener">在 OKLink 查看</a>
+      <button class="ghost" id="copy">复制地址</button>
+      <a class="ghost" href="./">去看签文</a>
+    </div>
+  </div>
+
+  <p class="fine" style="margin-top:26px">合约不保存地址画像，只保存 32 字节的签文哈希与时间。部署者保留 setFee / withdraw 权限。</p>
+</main>
+
+<script src="deploy.js"></script>
+</body>
+</html>
