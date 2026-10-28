@@ -10,7 +10,7 @@
 
 | 检查 | 结果 |
 | --- | --- |
-| 仓库密钥扫描 | 23 个跟踪文件，无 `.env`、无 token、无 `node_modules` |
+| 仓库密钥扫描 | 24 个跟踪文件，无 `.env`、无 token、无 `node_modules` |
 | 合约源码 → artifact | 使用同一 source unit 名重新编译，bytecode / runtime 逐字节一致 |
 | artifact → 链上 | `eth_getCode` 1989 bytes，与 artifact **完全一致** |
 | 合约状态 | owner `0x3e85…104c`，fee `1e14`，`dayOpen(20755)=true`，seed 非零 |
