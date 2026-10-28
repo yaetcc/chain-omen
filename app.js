@@ -167,6 +167,7 @@ const CONTRACT = (() => {
 })();
 
 const RPC_URL = 'https://rpc.xlayer.tech';
+const SHARE_BASE = 'https://yaetcc.github.io/chain-omen/';
 const SEL_DAY_SEED = '0x9c137029';
 let seedCache = { day: null, seed: null, live: false };
 
@@ -799,6 +800,14 @@ function render(f, scroll = false) {
 
   $('#hash').textContent = f.hash;
 
+  const summary = f.traits.map((t) => `${t.label}${t.value}`).join('，');
+  const chartSummary = $('#chartSummary');
+  if (chartSummary) {
+    chartSummary.textContent = `${f.archetype.name}，${f.grade.label}，第 ${f.no} 签。八维：${summary}。`;
+  }
+  const srStatus = $('#srStatus');
+  if (srStatus) srStatus.textContent = `已生成 ${f.archetype.name} 的${f.grade.label}。`;
+
   // reveal
   const seq = ['.reading-head', 'h2', '#en', '#desc', '.poem', '.gua', '.yi-ji', '.luck'];
   seq.forEach((sel, i) => stagger($(sel, $('#reading')), i));
@@ -930,6 +939,15 @@ async function buildCard(f) {
   x.fillStyle = 'rgba(42,33,22,.42)';
   x.fillText(`${f.address.slice(0, 10)}…${f.address.slice(-6)}  ·  ${f.hash.slice(0, 18)}…`, 96, 1372);
 
+  // QR to this exact fortune
+  const shareUrl = `${SHARE_BASE}?a=${f.address}`;
+  if (drawQR(x, shareUrl, 482, 1226, 120)) {
+    x.fillStyle = 'rgba(42,33,22,.42)';
+    x.font = '400 8px "SF Mono",ui-monospace,monospace';
+    x.textAlign = 'center';
+    x.fillText('SCAN TO SEE MINE', 542, 1360);
+  }
+
   // seal
   x.save();
   x.translate(918, 1250);
@@ -947,6 +965,33 @@ async function buildCard(f) {
   x.restore();
 
   return c;
+}
+
+function drawQR(ctx, text, x, y, box) {
+  if (typeof qrcode !== 'function') return false;
+  try {
+    const qr = qrcode(0, 'M');
+    qr.addData(text);
+    qr.make();
+    const n = qr.getModuleCount();
+    const margin = 3;
+    const cell = box / (n + margin * 2);
+    ctx.save();
+    ctx.fillStyle = '#f3ead7';
+    ctx.fillRect(x - margin * cell, y - margin * cell, box + margin * cell * 2, box + margin * cell * 2);
+    ctx.fillStyle = '#2a2116';
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (qr.isDark(r, c)) {
+          ctx.fillRect(x + (c + margin) * cell, y + (r + margin) * cell, Math.ceil(cell), Math.ceil(cell));
+        }
+      }
+    }
+    ctx.restore();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function drawSpacedCentered(ctx, text, cx, y, spacing) {
@@ -1046,6 +1091,7 @@ $('#again').addEventListener('click', () => {
 });
 
 $('#download').addEventListener('click', downloadCard);
+$('#shareLink').addEventListener('click', shareFortune);
 
 /* ---------- x402: pay per reading ---------- */
 
@@ -1216,6 +1262,31 @@ $('#pay').addEventListener('click', async () => {
     note.textContent = err && err.code === 4001 ? '你取消了签名。' : String((err && err.message) || err);
   }
 });
+
+async function shareFortune() {
+  if (!current) return;
+  const url = `${SHARE_BASE}?a=${current.address}`;
+  const text = `${current.archetype.name} · ${current.grade.label} · 第 ${current.no} 签`;
+  const btn = $('#shareLink');
+  const old = btn.textContent;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: '链签 · CHAIN OMEN', text, url });
+      return;
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(url);
+    btn.textContent = '链接已复制';
+  } catch {
+    btn.textContent = '复制失败';
+  }
+  setTimeout(() => (btn.textContent = old), 1800);
+}
 
 /* seal modal */
 /* ---------- contract revenue ---------- */

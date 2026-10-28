@@ -71,11 +71,12 @@ keccak256("abc") = 4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6
 | --- | --- |
 | 八维命盘 | Canvas 绘制，8 个维度、8 个卦象、本卦取最盛的一维 |
 | 签文 | 签等 / 签号 / 判词 / 宜忌 / 幸运色 / 数字 / 吉位 / 吉时 |
-| 分享卡 | 1080×1440 PNG，宣纸底 + 朱印，浏览器内直接导出 |
+| 分享卡 | 1080×1440 PNG，宣纸底 + 朱印 + 可扫码回到本人签文的二维码 |
 | x402 解签 | 真实 402 握手 + OKX Wallet 签 EIP-3009；`X402_MOCK=1` 可本地跑通，真结算需 facilitator 凭证 |
 | 上链存证 | OKX Wallet 直接签 `seal()`（0.0001 OKB），也可复制 `cast` 命令 |
 | 收入提取 | 合约区显示 `accrued`，owner 钱包可一键 `withdraw(address)` |
 | 部署页 | `/deploy.html`，连接 OKX Wallet 后两笔签名完成部署 + `openDay()` |
+| 分享 | 一键下载、复制链接 / 系统分享（Web Share）；OG 图、404、robots、sitemap 齐全 |
 | 响应式 | 桌面双栏、移动单栏，无框架、无构建步骤 |
 
 关键文件：
@@ -86,6 +87,7 @@ keccak256("abc") = 4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6
 - [`deploy.html`](deploy.html) / [`deploy.js`](deploy.js) — 主网部署页，私钥不离开钱包
 - [`contracts/FortuneSeal.sol`](contracts/FortuneSeal.sol) — 每日种子 + 存证
 - [`artifacts/FortuneSeal.json`](artifacts/FortuneSeal.json) — solc 0.8.26 编译产物
+- [`vendor/qrcode.js`](vendor/qrcode.js) — 分享卡二维码（qrcode-generator，MIT）
 - [`server/server.mjs`](server/server.mjs) — 支付服务：静态站 + `x402` 保护的解签 API
 - [`server/reading.mjs`](server/reading.mjs) — 服务端解签语料（不下发到浏览器）
 - [`scripts/keeper.sh`](scripts/keeper.sh) — 幂等 `openDay()` keeper

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yaetcc.github.io/chain-omen/sitemap.xml

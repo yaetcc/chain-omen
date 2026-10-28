@@ -9,7 +9,11 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="链签 · 你的钱包今天想说什么">
 <meta property="og:description" content="每日一签，由 X Layer 区块哈希与你的地址共同派生。同一天、同一地址，永远是同一卦。">
-<meta property="og:image" content="https://yaetcc.github.io/chain-omen/preview-card.png">
+<meta property="og:image" content="https://yaetcc.github.io/chain-omen/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://yaetcc.github.io/chain-omen/">
+<meta name="twitter:image" content="https://yaetcc.github.io/chain-omen/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2307070a'/%3E%3Crect x='9' y='9' width='46' height='46' fill='none' stroke='%23c9a86a' stroke-width='1.5'/%3E%3Ctext x='32' y='45' font-size='30' text-anchor='middle' fill='%23c9a86a' font-family='serif'%3E签%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css?v=20261029">
@@ -68,6 +72,7 @@
         </div>
         <ul class="dims" id="dims"></ul>
         <p class="chart-caption" id="caption">☰ 乾 · 天行健</p>
+        <p class="sr-only" id="chartSummary"></p>
         <div class="chart-guide">
           <p><b>读盘</b><span>外圈为盛，内圈为弱。八维取值 0–100。</span></p>
           <p><b>本卦</b><span>取最盛的一维，象辞见右。</span></p>
@@ -75,6 +80,7 @@
       </div>
 
       <article class="reading" id="reading">
+        <p class="sr-only" id="srStatus" aria-live="polite"></p>
         <div class="reading-head">
           <span class="grade" id="grade">上上签</span>
           <span class="no" id="no">第 88 签</span>
@@ -112,6 +118,7 @@
 
         <div class="actions">
           <button class="ghost" id="download" disabled>下载签文</button>
+          <button class="ghost" id="shareLink">分享签文</button>
           <button class="ghost" id="sealBtn">上链存证</button>
           <button class="ghost" id="again">换个地址</button>
         </div>
@@ -185,6 +192,7 @@
   </div>
 </div>
 
+<script src="vendor/qrcode.js"></script>
 <script src="app.js?v=20261029"></script>
 </body>
 </html>

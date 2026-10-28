@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; margin: 0; overflow: hidden; background: #07070a; }
+  body {
+    position: relative;
+    font-family: "Songti SC", "Noto Serif SC", "STSong", serif;
+    color: #efe7d6;
+    background:
+      radial-gradient(800px 620px at 82% 8%, rgba(201,168,106,.16), transparent 62%),
+      radial-gradient(700px 500px at 0% 100%, rgba(120,84,190,.12), transparent 60%),
+      #07070a;
+  }
+  .grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(201,168,106,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,106,.05) 1px, transparent 1px);
+    background-size: 80px 80px;
+    -webkit-mask-image: radial-gradient(circle at 30% 50%, #000, transparent 78%);
+    mask-image: radial-gradient(circle at 30% 50%, #000, transparent 78%);
+  }
+  .left { position: absolute; left: 78px; top: 74px; width: 640px; }
+  .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 46px; }
+  .mark { width: 38px; height: 38px; border: 1px solid #8f7342; color: #c9a86a; display: grid; place-items: center; font-size: 21px; }
+  .brand b { font-size: 19px; letter-spacing: .2em; font-weight: 600; }
+  .brand em { display: block; font-family: "Didot", "Times New Roman", serif; font-style: normal; font-size: 8px; letter-spacing: .34em; color: rgba(234,225,206,.35); margin-top: 3px; }
+  h1 { margin: 0 0 26px; font-size: 78px; line-height: 1.08; letter-spacing: .01em; font-weight: 600; }
+  h1 em {
+    font-style: normal;
+    background: linear-gradient(104deg, #f0e2bd, #c9a86a 55%, #9c7d47);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  p { margin: 0; font-family: "PingFang SC", sans-serif; font-size: 17px; line-height: 1.9; color: rgba(234,225,206,.55); }
+  .url { position: absolute; left: 78px; bottom: 58px; font-family: "SF Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: .14em; color: #c9a86a; }
+  .right { position: absolute; right: 52px; top: 52px; width: 360px; height: 526px; }
+  .right img {
+    width: 100%; height: 100%; object-fit: cover; object-position: top;
+    border: 1px solid rgba(201,168,106,.28);
+    box-shadow: 0 40px 90px -30px #000, 0 0 0 8px rgba(201,168,106,.03);
+    transform: rotate(-3deg);
+    border-radius: 2px;
+  }
+  .seal { position: absolute; right: 18px; bottom: 28px; width: 82px; height: 82px; background: #a8342a; color: #f3ead7; display: grid; place-items: center; font-size: 30px; transform: rotate(-6deg); border: 2px solid rgba(243,234,214,.85); }
+</style>
+</head>
+<body>
+<div class="grid"></div>
+<div class="left">
+  <div class="brand"><span class="mark">签</span><span><b>链签</b><em>CHAIN OMEN</em></span></div>
+  <h1>你的钱包，<br><em>今天想说什么？</em></h1>
+  <p>每日一签，由 X Layer 区块哈希与你地址共同派生。<br>同一天、同一地址，永远是同一卦。</p>
+</div>
+<div class="url">yaetcc.github.io/chain-omen</div>
+<div class="right"><img src="preview-card.png" alt=""></div>
+</body>
+</html>

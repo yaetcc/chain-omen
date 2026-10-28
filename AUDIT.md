@@ -15,7 +15,7 @@
 | artifact → 链上 | `eth_getCode` 1989 bytes，与 artifact **完全一致** |
 | 合约状态 | owner `0x3e85…104c`，fee `1e14`，`dayOpen(20755)=true`，seed 非零 |
 | 哈希一致性 | 前端 `0x0baf…3de1` = 合约 `fortuneOf(0x8f3a…, 20755)` |
-| 分享卡 | 1080×1440 PNG，约 622 KB，浏览器内生成成功 |
+| 分享卡 | 1080×1440 PNG，浏览器内生成成功；二维码用 jsQR 解码，得到正确的 `?a=` 地址 |
 | 静态站 | GitHub Pages 首页 / CSS / JS / deploy.html / artifact / 分享卡全部 200 |
 | 服务端 402 | `PAYMENT-REQUIRED` 头存在，`amount=100000`，`asset=USDT0`，`payTo` 正确 |
 | 服务端校验 | 非法地址 400；未开签日 409；坏 `PAYMENT-SIGNATURE` 返回 402 而不是 500 |
