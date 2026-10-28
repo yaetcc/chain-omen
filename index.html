@@ -146,8 +146,13 @@
       <div class="kv"><span>合约</span><b class="mono"><a id="contractAddr" href="deploy.html">待部署</a></b></div>
       <div class="kv"><span>方法</span><b class="mono">seal() · 0.0001 OKB</b></div>
       <div class="kv"><span>读法</span><b class="mono">fortuneOf(address, day)</b></div>
+      <div class="kv"><span>存证收入</span><b class="mono" id="revAmount">读取中…</b></div>
       <p class="contract-note">合约只存一枚 32 字节的哈希，不存地址画像、不存任何隐私数据。它证明的是「这枚签在今天之前就存在」，而不是「这枚签很准」。</p>
       <p class="contract-note"><a class="deploy-link" href="deploy.html">还没有部署？用 OKX Wallet 两步上主网 →</a></p>
+      <div class="rev-actions">
+        <button class="ghost" id="withdrawBtn" hidden>提取到我的钱包</button>
+        <p class="fine" id="revNote">连接 owner 钱包后可提取。</p>
+      </div>
     </div>
   </section>
 </main>

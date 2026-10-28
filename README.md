@@ -74,6 +74,7 @@ keccak256("abc") = 4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6
 | 分享卡 | 1080×1440 PNG，宣纸底 + 朱印，浏览器内直接导出 |
 | x402 解签 | 真实 402 握手 + OKX Wallet 签 EIP-3009；`X402_MOCK=1` 可本地跑通，真结算需 facilitator 凭证 |
 | 上链存证 | OKX Wallet 直接签 `seal()`（0.0001 OKB），也可复制 `cast` 命令 |
+| 收入提取 | 合约区显示 `accrued`，owner 钱包可一键 `withdraw(address)` |
 | 部署页 | `/deploy.html`，连接 OKX Wallet 后两笔签名完成部署 + `openDay()` |
 | 响应式 | 桌面双栏、移动单栏，无框架、无构建步骤 |
 
@@ -141,6 +142,7 @@ OKX facilitator 验证并结算后，服务端返回四段完整解签。
 - **本地联调**：`X402_MOCK=1`，mock facilitator 只检查字段完整，不碰链。
 - **真结算**：复制 `server/.env.example` 为 `server/.env`，填 `OKX_API_KEY` / `OKX_SECRET_KEY` / `OKX_PASSPHRASE`，然后 `node --env-file=.env server.mjs`。
 - 买家需要 X Layer 上的 USDT0；gas 由 facilitator 代付，买家只签名。
+- 这 0.10 USDT0 由 facilitator 直接付给 `payTo`（owner 钱包），**不经过合约**，不需要提取。
 
 ---
 
@@ -174,6 +176,8 @@ OKX facilitator 验证并结算后，服务端返回四段完整解签。
 - `fortuneOf(address, uint256)` — 复算某地址某天的签
 - `seal()` — 付 0.0001 OKB 把当天的签写进合约，一天一次
 - `setFee` / `withdraw` — owner 接口
+
+`seal()` 的 0.0001 OKB 会累积在 `accrued`，owner 可以在网站「存证合约」区直接点「提取到我的钱包」，或调用 `withdraw(address to)` 提到任意地址。合约只存这笔 OKB；x402 的 USDT0 收入直接进 `payTo`，不在合约里。
 
 生产环境需要一个 cron / keeper，在每天 00:00（UTC+8）后调用一次 `openDay()`；没人调用的话，当天的签不会生成。
 

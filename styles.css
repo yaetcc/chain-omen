@@ -796,3 +796,10 @@ footer {
 @media (max-width: 680px) {
   .demo-badge { left: 12px; bottom: 12px; font-size: 8px; }
 }
+
+/* ---------------- contract revenue ---------------- */
+
+.rev-actions { margin-top: 16px; }
+.rev-actions .ghost { width: 100%; }
+.rev-actions .fine { min-height: 16px; }
+#revNote a { color: var(--gold); border-bottom: 1px solid var(--hair); }

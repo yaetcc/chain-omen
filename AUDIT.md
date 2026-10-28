@@ -24,6 +24,7 @@
 | HTML 结构 | 无重复 id，无失效锚点，`target=_blank` 均带 `rel=noopener` |
 | YAML | `render.yaml`、`open-day.yml` 语法有效 |
 | GitHub Actions | 手动触发 `open-day`，运行成功；当日已开，keeper 幂等退出 |
+| owner 提取 UI | mock 钱包验证：读取 accrued、owner 校验、`withdraw(address)` calldata 正确；非 owner 隐藏按钮 |
 
 ## 本轮修复
 

@@ -256,6 +256,7 @@ async function sealNow() {
     if (rc.status !== '0x1') throw new Error('交易失败：今天可能已经存证过了');
     out.innerHTML = `已上链 · <a href="https://www.oklink.com/xlayer/tx/${tx}" target="_blank" rel="noopener">${tx.slice(0, 10)}…</a>`;
     btn.textContent = '已存证';
+    refreshRevenue();
   } catch (err) {
     out.textContent = err && err.code === 4001 ? '你取消了签名。' : String((err && err.message) || err);
     btn.disabled = false;
@@ -1217,6 +1218,129 @@ $('#pay').addEventListener('click', async () => {
 });
 
 /* seal modal */
+/* ---------- contract revenue ---------- */
+
+const SEL_ACCRUED = '0xa07e52a2';
+const SEL_OWNER = '0x8da5cb5b';
+const SEL_WITHDRAW = '0x51cff8d9';
+let revOwner = '';
+
+function fmtWei(hex) {
+  const w = BigInt(hex);
+  const whole = w / 10n ** 18n;
+  const frac = (w % 10n ** 18n).toString().padStart(18, '0').slice(0, 6).replace(/0+$/, '');
+  return `${whole}${frac ? '.' + frac : ''} OKB`;
+}
+
+async function ethCall(to, data) {
+  const res = await fetch(RPC_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to, data }, 'latest'] }),
+  });
+  const json = await res.json();
+  if (json.error) throw new Error(json.error.message);
+  return json.result;
+}
+
+async function refreshRevenue() {
+  const amountEl = $('#revAmount');
+  const noteEl = $('#revNote');
+  const btn = $('#withdrawBtn');
+  if (!amountEl || !noteEl || !btn) return;
+
+  if (!CONTRACT) {
+    amountEl.textContent = '—';
+    noteEl.textContent = '合约未部署。';
+    btn.hidden = true;
+    return;
+  }
+
+  try {
+    const [accHex, ownerHex] = await Promise.all([
+      ethCall(CONTRACT, SEL_ACCRUED),
+      ethCall(CONTRACT, SEL_OWNER),
+    ]);
+    const acc = BigInt(accHex);
+    revOwner = '0x' + String(ownerHex).slice(-40);
+    amountEl.textContent = fmtWei(accHex);
+
+    if (!wallet) {
+      btn.hidden = true;
+      noteEl.textContent = '连接钱包后，owner 可提取。';
+      return;
+    }
+
+    let account = '';
+    try {
+      const accounts = await wallet.request({ method: 'eth_accounts' });
+      account = (accounts && accounts[0]) || '';
+    } catch {}
+
+    if (!account) {
+      btn.hidden = true;
+      noteEl.textContent = '连接钱包后，owner 可提取。';
+      return;
+    }
+    if (account.toLowerCase() !== revOwner.toLowerCase()) {
+      btn.hidden = true;
+      noteEl.textContent = `当前钱包不是 owner（${revOwner.slice(0, 6)}…${revOwner.slice(-4)}）。`;
+      return;
+    }
+
+    btn.hidden = false;
+    btn.disabled = acc === 0n;
+    btn.textContent = acc === 0n ? '暂无可提取收入' : '提取到我的钱包';
+    noteEl.textContent = acc === 0n ? '还没有人存证。' : '只有 owner 能提取，合约会强制校验。';
+  } catch {
+    amountEl.textContent = '读取失败';
+    btn.hidden = true;
+    noteEl.textContent = 'RPC 暂时不可用。';
+  }
+}
+
+async function withdrawRevenue() {
+  const amountEl = $('#revAmount');
+  const note = $('#revNote');
+  const btn = $('#withdrawBtn');
+  if (!wallet || !CONTRACT || !revOwner) return;
+
+  btn.disabled = true;
+  btn.textContent = '等待钱包确认…';
+  note.textContent = '';
+
+  try {
+    await ensureXLayer();
+    const accounts = await wallet.request({ method: 'eth_requestAccounts' });
+    const from = accounts && accounts[0];
+    if (!from || from.toLowerCase() !== revOwner.toLowerCase()) throw new Error('当前钱包不是 owner');
+
+    const data = SEL_WITHDRAW + from.slice(2).toLowerCase().padStart(64, '0');
+    const tx = await wallet.request({
+      method: 'eth_sendTransaction',
+      params: [{ from, to: CONTRACT, data }],
+    });
+
+    note.textContent = `交易已发出 ${tx.slice(0, 10)}… 等待上链`;
+    let rc = null;
+    for (let i = 0; i < 60; i++) {
+      rc = await wallet.request({ method: 'eth_getTransactionReceipt', params: [tx] });
+      if (rc) break;
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    if (!rc) throw new Error('等待上链超时，请到 OKLink 查看');
+    if (rc.status !== '0x1') throw new Error('提取失败');
+
+    if (amountEl) amountEl.textContent = '0 OKB';
+    note.innerHTML = `已提取 · <a href="https://www.oklink.com/xlayer/tx/${tx}" target="_blank" rel="noopener">${tx.slice(0, 10)}…</a>`;
+    btn.textContent = '已提取';
+  } catch (err) {
+    note.textContent = err && err.code === 4001 ? '你取消了签名。' : String((err && err.message) || err);
+    btn.disabled = false;
+    btn.textContent = '重试提取';
+  }
+}
+
 function openModal() {
   if (!current) return;
   $('#mAddr').textContent = current.address;
@@ -1241,6 +1365,8 @@ function closeModal() {
 
 $('#sealBtn').addEventListener('click', openModal);
 $('#sealNow').addEventListener('click', sealNow);
+$('#withdrawBtn').addEventListener('click', withdrawRevenue);
+wallet?.on?.('accountsChanged', () => refreshRevenue());
 $('#closeModal').addEventListener('click', closeModal);
 $('#closeModal2').addEventListener('click', closeModal);
 $('#modal').addEventListener('click', (e) => {
@@ -1293,6 +1419,7 @@ async function showDemoBadge() {
 initSky();
 paintContract();
 showDemoBadge();
+refreshRevenue();
 
 const params = new URLSearchParams(location.search);
 const pre = params.get('a');
