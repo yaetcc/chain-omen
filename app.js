@@ -1278,8 +1278,10 @@ async function refreshRevenue() {
     } catch {}
 
     if (!account) {
-      btn.hidden = true;
-      noteEl.textContent = '连接钱包后，owner 可提取。';
+      btn.hidden = false;
+      btn.disabled = false;
+      btn.textContent = '连接 owner 钱包';
+      noteEl.textContent = '连接后检查提取权限。';
       return;
     }
     if (account.toLowerCase() !== revOwner.toLowerCase()) {
@@ -1313,7 +1315,11 @@ async function withdrawRevenue() {
     await ensureXLayer();
     const accounts = await wallet.request({ method: 'eth_requestAccounts' });
     const from = accounts && accounts[0];
-    if (!from || from.toLowerCase() !== revOwner.toLowerCase()) throw new Error('当前钱包不是 owner');
+    if (!from) throw new Error('没有连接钱包');
+    if (from.toLowerCase() !== revOwner.toLowerCase()) {
+      await refreshRevenue();
+      throw new Error('当前钱包不是 owner');
+    }
 
     const data = SEL_WITHDRAW + from.slice(2).toLowerCase().padStart(64, '0');
     const tx = await wallet.request({
