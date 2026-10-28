@@ -5,6 +5,9 @@ on:
     - cron: "7 * * * *" # hourly at :07; opens the day right after 00:00 UTC+8
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: open-day
   cancel-in-progress: false

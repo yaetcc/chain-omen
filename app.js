@@ -132,6 +132,8 @@ function fortuneHash(address, day, daySeed) {
 }
 
 const pick = (rnd, arr) => arr[Math.floor(rnd() * arr.length)];
+const esc = (v) =>
+  String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
 const smooth = (a, b, v) => {
   const t = clamp01((v - a) / (b - a));
@@ -1176,13 +1178,14 @@ function showPaid(data) {
   const box = $('#unlocked');
   box.hidden = false;
   const tag = data.mock ? 'PAID · DEMO' : 'PAID · 0.10 USDT · X402';
-  const tx = data.tx
-    ? `<p class="fine">tx <a href="https://www.oklink.com/xlayer/tx/${data.tx}" target="_blank" rel="noopener">${data.tx.slice(0, 12)}…</a></p>`
+  const safeTx = /^0x[0-9a-fA-F]{64}$/.test(data.tx || '') ? data.tx : '';
+  const tx = safeTx
+    ? `<p class="fine">tx <a href="https://www.oklink.com/xlayer/tx/${safeTx}" target="_blank" rel="noopener">${safeTx.slice(0, 12)}…</a></p>`
     : '';
   box.innerHTML =
-    `<span class="paid-stamp">${tag}</span>` +
-    `<h4>${data.title || '完整解签'}</h4>` +
-    (data.paragraphs || current.paid).map((p) => `<p>${p}</p>`).join('') +
+    `<span class="paid-stamp">${esc(tag)}</span>` +
+    `<h4>${esc(data.title || '完整解签')}</h4>` +
+    (data.paragraphs || current.paid).map((p) => `<p>${esc(p)}</p>`).join('') +
     tx;
   box.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
@@ -1260,17 +1263,29 @@ $('#copyCmd').addEventListener('click', async (e) => {
 /* ---------- demo badge ---------- */
 
 async function showDemoBadge() {
+  let cfg = null;
   try {
     const res = await fetch('/api/config', { headers: { accept: 'application/json' } });
-    if (!res.ok) return;
-    const cfg = await res.json();
-    if (!cfg.mock) return;
-    const el = document.createElement('div');
-    el.className = 'demo-badge';
-    el.innerHTML = '<i></i>DEMO · 支付未接通真实结算';
-    el.title = '当前使用 mock facilitator，不会真的收款。';
-    document.body.appendChild(el);
+    if (res.ok) cfg = await res.json();
   } catch {}
+
+  const staticOnly = !cfg;
+  if (!staticOnly && !cfg.mock) return;
+
+  const el = document.createElement('div');
+  el.className = 'demo-badge';
+  el.innerHTML = `<i></i>${staticOnly ? 'STATIC DEMO · 支付服务未接入' : 'DEMO · 支付未接通真实结算'}`;
+  el.title = staticOnly
+    ? '这是纯静态站，解锁只在本地演示，不会收款。'
+    : '当前使用 mock facilitator，不会真的收款。';
+  document.body.appendChild(el);
+
+  const note = $('#payNote');
+  if (note) {
+    note.textContent = staticOnly
+      ? '静态演示 · 点击后在本地解锁，不会收款。'
+      : 'DEMO · mock facilitator，不会真的收款。';
+  }
 }
 
 /* ---------- boot ---------- */

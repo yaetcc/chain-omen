@@ -12,6 +12,12 @@ CONTRACT="${CONTRACT:-0x5d07f0386d53f99bacd6baaf85c289201313565a}"
 RPC="${RPC_URL:-https://rpc.xlayer.tech}"
 export PATH="${HOME}/.foundry/bin:${PATH}"
 
+CHAIN=$(cast chain-id --rpc-url "$RPC")
+if [ "$CHAIN" != "196" ]; then
+  echo "expected chain 196, got $CHAIN" >&2
+  exit 1
+fi
+
 DAY=$(( ( $(date +%s) + 28800 ) / 86400 ))
 echo "day=$DAY contract=$CONTRACT"
 

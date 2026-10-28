@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node --env-file=.env server.mjs",
-    "dev": "X402_MOCK=1 node --env-file=.env server.mjs"
+    "start": "node server.mjs",
+    "start:env": "node --env-file=.env server.mjs",
+    "dev": "X402_MOCK=1 node server.mjs"
   },
   "dependencies": {
     "@okxweb3/x402-core": "^0.1.0",

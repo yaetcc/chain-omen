@@ -106,6 +106,28 @@ function facilitator() {
 const app = express();
 app.set('trust proxy', 1);
 
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// cheap in-memory guard against RPC spam; 60 requests / minute / IP
+const ipHits = new Map();
+app.use('/api/reading', (req, res, next) => {
+  const now = Date.now();
+  const rec = ipHits.get(req.ip) || { t: now, n: 0 };
+  if (now - rec.t > 60_000) {
+    rec.t = now;
+    rec.n = 0;
+  }
+  rec.n++;
+  ipHits.set(req.ip, rec);
+  if (ipHits.size > 5000) ipHits.clear();
+  if (rec.n > 60) return res.status(429).json({ error: 'too many requests' });
+  next();
+});
+
 app.get('/api/config', (_req, res) => {
   res.json({
     mock: MOCK,
